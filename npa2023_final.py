@@ -20,7 +20,7 @@ accessToken = "Bearer Mzk1OWYwMzktYjk5Zi00NWFhLTllMjgtZWE1NTlmZDc0YTE0NTUzMWExZG
 
 # Defines a variable that will hold the roomId
 roomIdToGetMessages = (
-    "Y2lzY29zcGFyazovL3VzL1JPT00vZjIwYzQ4ZjAtZjQzZi0xMWViLWI5ZjUtZjQwZjQwZjQwZjQw"
+    "Y2lzY29zcGFyazovL3VzL1JPT00vNTFmNTJiMjAtNWQwYi0xMWVmLWE5YTAtNzlkNTQ0ZjRkNGZi"
 )
 
 while True:
@@ -41,7 +41,7 @@ while True:
     # - Use the GetParameters to get only the latest message.
     # - Store the message in the "r" variable.
     r = requests.get(
-        "www.webexapis.com/v1/messages",
+        "https://webexapis.com/v1/messages",
         params=getParameters,
         headers=getHTTPHeader,
     )
@@ -100,7 +100,7 @@ while True:
 
         # Post the call to the Webex Teams message API.
         r = requests.post(
-            "<!!!REPLACEME with URL of Webex Teams Messages API!!!>",
+            "https://webexapis.com/v1/messages",
             data=json.dumps(postData),
             headers=postHTTPHeaders,
         )

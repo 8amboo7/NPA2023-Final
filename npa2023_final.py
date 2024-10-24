@@ -11,11 +11,14 @@ import json
 import time
 # from restconf_final import create, delete, enable, disable, status
 from netconf_final import create, delete, enable, disable, status
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 #######################################################################################
 # 2. Assign the Webex hard-coded access token to the variable accessToken.
 
-accessToken = "Bearer ODViNWI1MGQtODkxNC00YmQwLTk3MmQtMzNiZTEzNzYxZWE3Zjk2MzdjMDMtYjc4_P0A1_1ad92174-dfe2-4740-b008-57218895946c"
+accessToken = "Bearer " + os.getenv("WEBEX_TEAMS_ACCESS_TOKEN")
 
 #######################################################################################
 # 3. Prepare parameters get the latest message for messages API.

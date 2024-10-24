@@ -9,11 +9,13 @@
 import requests
 import json
 import time
+# from restconf_final import create, delete, enable, disable, status
+from netconf_final import create, delete, enable, disable, status
 
 #######################################################################################
 # 2. Assign the Webex hard-coded access token to the variable accessToken.
 
-accessToken = "Bearer Mzk1OWYwMzktYjk5Zi00NWFhLTllMjgtZWE1NTlmZDc0YTE0NTUzMWExZGQtOTE2_P0A1_1ad92174-dfe2-4740-b008-57218895946c"
+accessToken = "Bearer ODViNWI1MGQtODkxNC00YmQwLTk3MmQtMzNiZTEzNzYxZWE3Zjk2MzdjMDMtYjc4_P0A1_1ad92174-dfe2-4740-b008-57218895946c"
 
 #######################################################################################
 # 3. Prepare parameters get the latest message for messages API.
@@ -76,23 +78,23 @@ while True:
 # 5. Complete the logic for each command
 
         if command == "create":
-            responseMessage = "Create command executed."
+            responseMessage = create() # Add 
         elif command == "delete":
-            responseMessage = "Delete command executed."
+            responseMessage = delete() # Add
         elif command == "enable":
-            responseMessage = "Enable command executed."
+            responseMessage = enable() # Add
         elif command == "disable":
-            responseMessage = "Disable command executed."
+            responseMessage = disable() # Add
         elif command == "status":
-            responseMessage = "Status command executed."
+            responseMessage = status() # Add
         else:
             responseMessage = "Error: No command or unknown command"
+# เติม content-type
+        postHTTPHeaders = HTTPHeaders = {"Authorization": accessToken, "Content-Type": "application/json"} # Add
         
 # 6. Complete the code to post the message to the Webex Teams room.
         
         # the Webex Teams HTTP headers, including the Authoriztion and Content-Type
-        postHTTPHeaders = HTTPHeaders = {"Authorization": accessToken, "Content-Type": "application/json"}
-
         # The Webex Teams POST JSON data
         # - "roomId" is is ID of the selected room
         # - "text": is the responseMessage assembled above

@@ -2,161 +2,134 @@ import json
 import requests
 requests.packages.urllib3.disable_warnings()
 
-# Router IP Address is 10.0.15.189
-api_url = "https://10.0.15.182/restconf"
 
-# the RESTCONF HTTP headers, including the Accept and Content-Type
-# Two YANG data formats (JSON and XML) work with RESTCONF 
+# Router IP Address is 10.0.15.189
+api_url = "https://10.0.15.181/restconf"
+
 headers = {
     "Accept": "application/yang-data+json",
-    "Content-Type": "application/yang-data+json"
+    "Content-Type": "application/yang-data+json",
 }
 basicauth = ("admin", "cisco")
 
-def check_interface_exists(loopback_name):
-    resp = requests.get(
-        f"{api_url}/data/ietf-interfaces:interfaces/interface={loopback_name}",
-        auth=basicauth,
-        headers=headers,
-        verify=False
-    )
-    return resp.status_code == 200
-
-
-def create(studentID):
-    # ตั้งชื่อ Loopback interface ตาม studentID
-    loopback_name = f"Loopback65070211"
-    # ใช้เลข 3 หลักสุดท้ายของ studentID ในการตั้งค่า IP Address
-    ip_last_octet = studentID[-3:]
-    ip_address = f"172.30.{ip_last_octet}.1"
-    
-    # ตรวจสอบก่อนว่า Loopback interface นั้นมีอยู่แล้วหรือไม่
-    if not check_interface_exists(loopback_name):
-        # ถ้าไม่มี interface อยู่ จะสร้างใหม่โดยใช้ YANG model
-        yangConfig = {
-            "ietf-interfaces:interface": {
-                "name": loopback_name,
-                "description": f"Loopback interface for student {studentID}",
-                "type": "iana-if-type:softwareLoopback",
-                "enabled": True,
-                "ietf-ip:ipv4": {
-                    "address": [
-                        {
-                            "ip": ip_address,
-                            "netmask": "255.255.255.0"
-                        }
-                    ]
+def create():
+    yangConfig = {"ietf-interfaces:interface": {
+        "name": "Loopback65070211",
+        "type": "iana-if-type:softwareLoopback",
+        "enabled": True,
+        "ietf-ip:ipv4": {
+            "address": [
+                {
+                    "ip": "172.30.211.1",
+                    "netmask": "255.255.255.0"
                 }
-            }
+            ]
+        },
+        "ietf-ip:ipv6": {}
+    }}
+
+    resp = requests.put(
+        api_url + "/data/ietf-interfaces:interfaces/interface=Loopback65070211", 
+        data=json.dumps(yangConfig), 
+        auth=basicauth, 
+        headers=headers, 
+        verify=False
+        )
+
+    if(resp.status_code >= 200 and resp.status_code <= 299):
+        print("STATUS OK: {}".format(resp.status_code))
+        return "Interface loopback65070211 is created successfully" 
+    else:
+        print('Error. Status Code: {}'.format(resp.status_code))
+        return "Cannot create: Interface loopback65070211" 
+
+def delete():
+    resp = requests.delete(
+        api_url + "/data/ietf-interfaces:interfaces/interface=Loopback65070211", 
+        auth=basicauth, 
+        headers=headers, 
+        verify=False
+        )
+
+    if(resp.status_code >= 200 and resp.status_code <= 299):
+        print("STATUS OK: {}".format(resp.status_code))
+        return "Interface loopback65070211 is deleted successfully" 
+    else:
+        print('Error. Status Code: {}'.format(resp.status_code))
+        return "Cannot deleted: Interface loopback65070211" 
+
+def enable():
+    yangConfig = {
+        "ietf-interfaces:interface": {
+            "name": "Loopback65070211",
+            "type": "iana-if-type:softwareLoopback",
+            "enabled": True
         }
+    }
 
-        # ส่ง POST request ไปยัง RESTCONF API เพื่อสร้าง interface
-        resp = requests.post(
-            f"{api_url}/data/ietf-interfaces:interfaces",
-            data=json.dumps(yangConfig),  # แปลงข้อมูลเป็น JSON
-            auth=basicauth,  # ข้อมูลการ authentication
-            headers=headers,  # HTTP headers
-            verify=False  # ไม่ตรวจสอบ SSL certificate
+    resp = requests.patch(
+        api_url + "/data/ietf-interfaces:interfaces/interface=Loopback65070211", 
+        data=json.dumps(yangConfig), 
+        auth=basicauth, 
+        headers=headers, 
+        verify=False
         )
 
-        # ตรวจสอบสถานะการสร้าง interface
-        if resp.status_code == 201:  # 201 คือ สร้างสำเร็จ
-            return f"Interface {loopback_name} is created successfully"
-        else:
-            return f"Error creating interface: {resp.status_code}"
+    if(resp.status_code >= 200 and resp.status_code <= 299):
+        print("STATUS OK: {}".format(resp.status_code))
+        return "Interface loopback65070211 is enabled successfully" 
     else:
-        # ถ้ามี Interface อยู่แล้ว ไม่ต้องสร้างใหม่
-        return f"Cannot create: Interface {loopback_name} already exists"
+        print('Error. Status Code: {}'.format(resp.status_code))
+        return "Cannot enable: Interface loopback65070211" 
 
-
-def delete(studentID):
-    loopback_name = f"Loopback{studentID}"
-    
-    if check_interface_exists(loopback_name):
-        resp = requests.delete(
-            f"{api_url}/data/ietf-interfaces:interfaces/interface={loopback_name}",
-            auth=basicauth,
-            headers=headers,
-            verify=False
-        )
-        if resp.status_code == 204:
-            return f"Interface {loopback_name} is deleted successfully"
-        else:
-            return f"Error deleting interface: {resp.status_code}"
-    else:
-        return f"Cannot delete: Interface {loopback_name} does not exist"
-
-def enable(studentID):
-    loopback_name = f"Loopback{studentID}"
-    
-    if check_interface_exists(loopback_name):
-        yangConfig = {
-            "ietf-interfaces:interface": {
-                "enabled": True
-            }
+def disable():
+    yangConfig = {
+        "ietf-interfaces:interface": {
+            "name": "Loopback65070211",
+            "type": "iana-if-type:softwareLoopback",
+            "enabled": False
         }
+    }
 
-        resp = requests.put(
-            f"{api_url}/data/ietf-interfaces:interfaces/interface={loopback_name}",
-            data=json.dumps(yangConfig),
-            auth=basicauth,
-            headers=headers,
-            verify=False
+    resp = requests.patch(
+        api_url + "/data/ietf-interfaces:interfaces/interface=Loopback65070211", 
+        data=json.dumps(yangConfig), 
+        auth=basicauth, 
+        headers=headers, 
+        verify=False
         )
 
-        if resp.status_code == 204:
-            return f"Interface {loopback_name} is enabled successfully"
-        else:
-            return f"Error enabling interface: {resp.status_code}"
+    if(resp.status_code >= 200 and resp.status_code <= 299):
+        print("STATUS OK: {}".format(resp.status_code))
+        return "Interface loopback65070211 is shutdowned successfully" 
     else:
-        return f"Cannot enable: Interface {loopback_name} does not exist"
-
-
-
-def disable(studentID):
-    loopback_name = f"Loopback{studentID}"
+        print('Error. Status Code: {}'.format(resp.status_code))
+        return "'Cannot shutdown: Interface loopback65070211" 
     
-    if check_interface_exists(loopback_name):
-        yangConfig = {
-            "ietf-interfaces:interface": {
-                "enabled": False
-            }
-        }
+def status():
+    api_url_status = "https://10.0.15.181/restconf/data/ietf-interfaces:interfaces-state/interface=Loopback65070211"
 
-        resp = requests.put(
-            f"{api_url}/data/ietf-interfaces:interfaces/interface={loopback_name}",
-            data=json.dumps(yangConfig),
-            auth=basicauth,
-            headers=headers,
-            verify=False
+    resp = requests.get(
+        api_url_status, 
+        auth=basicauth, 
+        headers=headers, 
+        verify=False
         )
 
-        if resp.status_code == 204:
-            return f"Interface {loopback_name} is shutdowned successfully"
-        else:
-            return f"Error disabling interface: {resp.status_code}"
-    else:
-        return f"Cannot shutdown: Interface {loopback_name} does not exist"
+    if(resp.status_code >= 200 and resp.status_code <= 299):
+        print("STATUS OK: {}".format(resp.status_code))
+        response_json = resp.json()
+        # print(json.dumps(response_json, indent=4))
 
-def status(studentID):
-    loopback_name = f"Loopback{studentID}"
+        admin_status = response_json["ietf-interfaces:interface"]["admin-status"]
+        oper_status = response_json["ietf-interfaces:interface"]["oper-status"]
 
-    if check_interface_exists(loopback_name):
-        resp = requests.get(
-            f"{api_url}/data/ietf-interfaces:interfaces/interface={loopback_name}",
-            auth=basicauth,
-            headers=headers,
-            verify=False
-        )
-        if resp.status_code == 200:
-            response_json = resp.json()
-            admin_status = response_json["ietf-interfaces:interface"]["enabled"]
-            oper_status = response_json["ietf-interfaces:interface"]["ietf-ip:ipv4"]["enabled"]
-            if admin_status and oper_status == 'up':
-                return f"Interface {loopback_name} is enabled"
-            else:
-                return f"Interface {loopback_name} is disabled"
-        else:
-            return f"Error getting status: {resp.status_code}"
+        if admin_status == 'up' and oper_status == 'up':
+            return "Interface loopback65070211 is enabled" 
+        elif admin_status == 'down' and oper_status == 'down':
+            return "Interface loopback65070211 is disabled" 
+    elif(resp.status_code == 404):
+        print("STATUS NOT FOUND: {}".format(resp.status_code))
+        return "No Interface loopback65070211" 
     else:
-        return f"No Interface {loopback_name}"
+        print('Error. Status Code: {}'.format(resp.status_code))
